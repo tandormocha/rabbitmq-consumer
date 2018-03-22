@@ -1,6 +1,10 @@
 package com.yiche;
 
+import com.yiche.pojo.ConsumerMsg;
+import com.yiche.utils.XstreamUtil;
+import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 /**
@@ -8,19 +12,18 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class MsgRecriver {
-    @RabbitListener(queues = "kouyyTest1")
-    public String processMessage1(String msg) {
-        System.out.println(Thread.currentThread().getName() + " 接收到来自queue1队列的消息：" + msg);
-        System.out.println("啊哈哈哈哈哈哈哈哈哈哈");
-        return msg.toUpperCase();
+
+
+    @RabbitListener(queues = "Recommend.UserFollow", containerFactory="rabbitListenerContainerFactory")
+    public void onMessage(@Payload Message msg) {
+        String messageBody = new String(msg.getBody());
+        ConsumerMsg msgObj = (ConsumerMsg) XstreamUtil.parseXmlToObject(messageBody);
+        int userId=msgObj.getBody().getOperaterInfo().getUserId();
+        int uid=msgObj.getBody().getFriend().getUID();
+        String redisKey="yiche.rc.result." +"user"+"."+userId;
+       System.out.println(redisKey);
     }
 
-    @RabbitListener(queues = "kouyyTest2")
-    public String processMessage2(String msg) {
-        System.out.println(Thread.currentThread().getName() + " 接收到来自queue2队列的消息：" + msg);
-        System.out.println("呃呃呃鹅鹅鹅鹅鹅鹅饿鹅鹅鹅饿");
-        return msg.toUpperCase();
-    }
 }
 
 
